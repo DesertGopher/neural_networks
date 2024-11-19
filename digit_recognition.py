@@ -4,7 +4,7 @@ import tkinter as tk
 from tkinter import messagebox
 from PIL import Image, ImageDraw, ImageOps
 
-model = tf.keras.models.load_model('digit_recognition_model.h5')
+model = tf.keras.models.load_model('5_lab/digit_recognition_model_split.h5')
 
 
 class DigitRecognizerApp:
@@ -12,17 +12,14 @@ class DigitRecognizerApp:
         self.root = root
         self.root.title("Распознавание цифр")
 
-        self.label = tk.Label(self.root, text="Нарисуйте цифру и нажмите 'Распознать'", font=("Arial", 14))
-        self.label.grid(row=0, column=0, pady=10)
-
         self.canvas = tk.Canvas(self.root, width=280, height=280, bg="black")
         self.canvas.grid(row=1, column=0, pady=10)
         self.canvas.bind("<B1-Motion>", self.paint)
 
-        self.predict_button = tk.Button(self.root, text="Распознать", command=self.predict_digit, font=("Arial", 12))
+        self.predict_button = tk.Button(self.root, text="OK", command=self.predict_digit, font=("Arial", 12))
         self.predict_button.grid(row=2, column=0, pady=5)
 
-        self.clear_button = tk.Button(self.root, text="Очистить", command=self.clear_canvas, font=("Arial", 12))
+        self.clear_button = tk.Button(self.root, text="Clear", command=self.clear_canvas, font=("Arial", 12))
         self.clear_button.grid(row=3, column=0, pady=5)
 
         self.image = Image.new("L", (280, 280), color="black")
