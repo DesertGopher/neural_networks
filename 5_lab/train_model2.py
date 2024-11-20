@@ -1,7 +1,8 @@
+import numpy as np
 from keras import layers, models
 import pandas as pd
 from matplotlib import pyplot as plt
-
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 
 train_data = pd.read_csv('mnist_train.csv')
 test_data = pd.read_csv('mnist_test.csv')
@@ -22,8 +23,7 @@ model = models.Sequential([
     layers.Conv2D(32, (3, 3), activation='relu'),
     layers.Flatten(),
     layers.Dense(64, activation='relu'),  # нейроны
-    # layers.Dropout(0.5),  # Снижение переобучения
-    layers.Dense(25, activation='softmax')  # 0-9
+    layers.Dense(25, activation='softmax')
 ])
 
 model.compile(optimizer='adam',
@@ -40,6 +40,14 @@ plt.title("Точность модели")
 plt.xlabel("Эпоха")
 plt.ylabel("Точность")
 plt.legend()
+plt.show()
+
+y_pred = np.argmax(model.predict(X_test), axis=1)
+conf_matrix = confusion_matrix(y_test, y_pred)
+
+disp = ConfusionMatrixDisplay(confusion_matrix=conf_matrix, display_labels=range(10))
+disp.plot(cmap=plt.cm.Blues, xticks_rotation='vertical')
+plt.title("Матрица ошибок")
 plt.show()
 
 model.save('digit_recognition_model_from_csv.h5')

@@ -25,7 +25,7 @@ class DigitRecognize:
         self.label = tk.Label(self.frame, text="Нарисуйте цифру", font=("Arial", 18, "bold"))
         self.label.grid(row=0, column=0, columnspan=2, pady=10)
 
-        self.canvas = tk.Canvas(self.frame, width=280, height=280, bg="black", relief="solid", bd=2)
+        self.canvas = tk.Canvas(self.frame, width=280, height=280, bg="white", relief="solid", bd=2)
         self.canvas.grid(row=1, column=0, columnspan=2, pady=10)
         self.canvas.bind("<B1-Motion>", self.paint)
 
@@ -38,23 +38,23 @@ class DigitRecognize:
         self.quit_button = tk.Button(self.frame, text="Выход", command=self.root.quit, font=("Arial", 14), width=20, bg="#9E9E9E", fg="white")
         self.quit_button.grid(row=3, column=0, columnspan=2, pady=10)
 
-        self.image = Image.new("L", (280, 280), color="black")
+        self.image = Image.new("L", (280, 280), color="white")
         self.draw = ImageDraw.Draw(self.image)
 
     def paint(self, event):
         x1, y1 = (event.x - 10), (event.y - 10)
         x2, y2 = (event.x + 10), (event.y + 10)
-        self.canvas.create_oval(x1, y1, x2, y2, fill="white", outline="white")
-        self.draw.ellipse([x1, y1, x2, y2], fill="white")
+        self.canvas.create_oval(x1, y1, x2, y2, fill="black", outline="black")
+        self.draw.ellipse([x1, y1, x2, y2], fill="black")
 
     def clear_canvas(self):
         self.canvas.delete("all")
-        self.image = Image.new("L", (280, 280), color="black")
+        self.image = Image.new("L", (280, 280), color="white")
         self.draw = ImageDraw.Draw(self.image)
 
     def predict_digit(self):
         digit_image = self.image.resize((28, 28))
-        digit_image = ImageOps.invert(digit_image)
+        # digit_image = ImageOps.invert(digit_image)
         digit_array = np.array(digit_image) / 255.0
         digit_array = digit_array.reshape(1, 28, 28)
 

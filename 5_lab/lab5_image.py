@@ -3,7 +3,7 @@ from keras import models
 from PIL import Image, ImageOps
 
 
-model = models.load_model('digit_recognition_model_split.h5')
+model = models.load_model('digit_recognition_model_from_csv_with_noise.h5')
 
 
 def predict_image(image_path):
@@ -24,5 +24,5 @@ def predict_image(image_path):
         return f"Ошибка {image_path}: {e}", None
 
 
-digit, conf = predict_image("zero.bmp")
+digit, conf = predict_image("five.bmp")
 print(f"Цифра: {digit}, Уверенность: {conf:.2f}%")

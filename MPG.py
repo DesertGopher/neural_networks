@@ -1,66 +1,67 @@
 import pandas as pd
-from keras import layers, models
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.preprocessing import StandardScaler
+import tensorflow as tf
 
-# Загрузка данных
-data = pd.read_csv("6_lab/MPG.txt", sep="\t")
 
-# Проверяем данные
-print(data.head())
+file_path = "6_lab/MPG.txt"  
+data = pd.read_csv(file_path, sep="\t")
 
-# Преобразование категориальных данных (если есть)
-encoder = OneHotEncoder(sparse_output=False)
-countries_encoded = encoder.fit_transform(data[['Country']])
-countries_df = pd.DataFrame(countries_encoded, columns=encoder.get_feature_names_out(['Country']))
-data = pd.concat([data, countries_df], axis=1).drop(columns=['Country'])
+data = data.drop(columns=["Country"])
 
-# Разделение данных на признаки и целевую переменную
-X = data.drop(columns=['MPG'])
-y = data['MPG']
+X = data.drop(columns=["MPG"]).values
+y = data["MPG"].values
 
-# Нормализация числовых признаков
 scaler = StandardScaler()
 X_scaled = scaler.fit_transform(X)
 
-# Разделение данных на обучающую и тестовую выборки
-X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.3, random_state=10)
+X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.2, random_state=42)
 
-# Создание модели нейросети
-model = models.Sequential([
-    layers.Dense(128, activation='relu', input_shape=(X_train.shape[1],)),
-    layers.Dense(64, activation='relu'),
-    layers.Dense(1)  # Один выход для регрессии
+lin_reg = LinearRegression()
+lin_reg.fit(X_train, y_train)
+y_pred = lin_reg.predict(X_test)
+
+mse_lin_reg = mean_squared_error(y_test, y_pred)
+r2_lin_reg = r2_score(y_test, y_pred)
+
+model = tf.keras.Sequential([
+    tf.keras.layers.Dense(64, activation='relu', input_shape=(X_train.shape[1],)),
+    tf.keras.layers.Dense(32, activation='relu'),
+    tf.keras.layers.Dense(1)
 ])
 
 model.compile(optimizer='adam', loss='mse', metrics=['mae'])
+history = model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=100, batch_size=64, verbose=2)
 
-# Обучение модели
-history = model.fit(X_train, y_train, epochs=70, validation_split=0.3, batch_size=64, verbose=1)
-
-# Оценка модели
-loss, mae = model.evaluate(X_test, y_test, verbose=2)
-print(f"Средняя абсолютная ошибка на тестовых данных: {mae:.2f}")
-
-# Предсказание и визуализация
-y_pred = model.predict(X_test)
-
-# Построение графика
 plt.figure(figsize=(10, 6))
-plt.scatter(y_test, y_pred, alpha=0.6)
-plt.plot([y_test.min(), y_test.max()], [y_test.min(), y_test.max()], 'r--')  # Линия идеального совпадения
-plt.xlabel('Истинное значение MPG')
-plt.ylabel('Предсказанное значение MPG')
-plt.title('Сравнение истинных и предсказанных значений')
+plt.scatter(y_test, y_pred, color='blue', label="Predictions")
+plt.plot([min(y_test), max(y_test)], [min(y_test), max(y_test)], color='red', linewidth=2, label="Ideal Line")
+plt.title("Linear Regression: Actual vs Predicted MPG")
+plt.xlabel("Actual MPG")
+plt.ylabel("Predicted MPG")
+plt.legend()
+plt.grid(True)
 plt.show()
 
-# График обучения
-plt.figure(figsize=(10, 6))
-plt.plot(history.history['loss'], label='Loss на обучении')
-plt.plot(history.history['val_loss'], label='Loss на валидации')
-plt.xlabel('Эпохи')
-plt.ylabel('MSE Loss')
+plt.figure(figsize=(14, 6))
+plt.subplot(1, 2, 1)
+plt.plot(history.history['loss'], label='Train Loss (MSE)')
+plt.plot(history.history['val_loss'], label='Validation Loss (MSE)')
+plt.title("Mean Squared Error Over Epochs")
+plt.xlabel("Epochs")
+plt.ylabel("MSE")
 plt.legend()
-plt.title('График обучения модели')
+plt.grid(True)
+
+plt.subplot(1, 2, 2)
+plt.plot(history.history['mae'], label='Train MAE')
+plt.plot(history.history['val_mae'], label='Validation MAE')
+plt.title("Mean Absolute Error Over Epochs")
+plt.xlabel("Epochs")
+plt.ylabel("MAE")
+plt.legend()
+plt.grid(True)
 plt.show()
